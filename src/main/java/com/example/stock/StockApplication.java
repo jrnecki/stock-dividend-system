@@ -18,11 +18,8 @@ import java.lang.annotation.Documented;
 public class StockApplication {
 
 	public static void main(String[] args) {
-		//SpringApplication.run(StockApplication.class, args);
+		SpringApplication.run(StockApplication.class, args);
 
-		Scraper yahooFinanceScrapper = new YahooFinanceScrapper();
-		var result = yahooFinanceScrapper.scrapCompanyByTicker("MMMM");
-		System.out.println(result);
 
 	}
 
