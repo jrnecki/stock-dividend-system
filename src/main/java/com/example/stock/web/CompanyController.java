@@ -1,8 +1,11 @@
 package com.example.stock.web;
 
 import com.example.stock.model.Company;
+import com.example.stock.persist.entity.CompanyEntity;
 import com.example.stock.service.CompanyService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
@@ -18,8 +21,9 @@ public class CompanyController {
 
     }
     @GetMapping
-    public ResponseEntity<?> searchCompany(){
-        return null;
+    public ResponseEntity<?> searchCompany(final Pageable pageble){
+        Page<CompanyEntity> companies = this.companyService.getAllCompany(pageble);
+        return ResponseEntity.ok(companies);
     }
 
     @PostMapping
