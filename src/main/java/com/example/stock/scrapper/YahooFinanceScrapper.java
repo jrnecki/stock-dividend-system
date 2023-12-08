@@ -70,8 +70,8 @@ public class YahooFinanceScrapper implements Scraper{
         try {
             Document document = Jsoup.connect(url).get();
             Element titleEle = document.getElementsByTag("h1").get(0);
-            String title = titleEle.text().split(">")[0];
-
+            String title = titleEle.text().split(">")[0].split(" ")[0];
+            System.out.println(title);
             return Company.builder()
                     .ticker(ticker)
                     .name(title)

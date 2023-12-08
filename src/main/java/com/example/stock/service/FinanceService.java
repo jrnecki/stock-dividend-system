@@ -8,10 +8,10 @@ import com.example.stock.persist.DividendRepository;
 import com.example.stock.persist.entity.CompanyEntity;
 import com.example.stock.persist.entity.DividendEntity;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,6 +19,10 @@ import java.util.stream.Collectors;
 public class FinanceService {
     private final CompanyRepository companyRepository;
     private final DividendRepository dividendRepository;
+    // 캐시 기준
+    // 요청이 자주 들어오는가?
+    // 자주 변경되는 데이터 인가?
+    @Cacheable(key="#companyName", value="finance")
     public ScrapedResult getDividendByCompanyName(String companyName){
         // 1. 회사명을 기준으로 회사 정보 조회
          CompanyEntity company =this.companyRepository.findByName(companyName)
