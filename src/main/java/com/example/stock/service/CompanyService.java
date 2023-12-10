@@ -1,5 +1,6 @@
 package com.example.stock.service;
 
+import com.example.stock.exception.impl.NoCompanyException;
 import com.example.stock.model.Company;
 import com.example.stock.model.ScrapedResult;
 import com.example.stock.persist.CompanyRepository;
@@ -78,5 +79,18 @@ public class CompanyService {
     }
     public void deleteAutocompleteKeyword(String keyword){
         this.trie.remove(keyword);
+    }
+
+    public String deleCompany(String ticker) {
+        var company = this.companyRepository.findByTicker(ticker)
+                .orElseThrow(NoCompanyException::new);
+        // 해당 회사의 배당금 지우기
+        this.dividendRepository.deleteAllByCompanyId(company.getId());
+        // 회사 정보 지우기
+        this.companyRepository.delete(company);
+        // 자동완성에서 지우기
+        this.deleteAutocompleteKeyword(company.getName());
+
+        return company.getName();
     }
 }

@@ -1,5 +1,6 @@
 package com.example.stock.security;
 
+import com.example.stock.service.MemberService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -7,6 +8,9 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.internal.StringUtil;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -18,7 +22,10 @@ import java.util.Date;
 public class TokenProvider {
     private static final long TOKEN_EXPIRE_TIME = 1000*60*60*2; // 2 hour
     private static final String KEY_ROLES = "roles";
-    @Value("${spring.jwt.secret}")
+
+    private final MemberService memberService;
+
+    @Value("{spring.jwt.secret}")
     private String secretKey;
 
     /**
@@ -29,7 +36,7 @@ public class TokenProvider {
      */
     public String generateToken(String username, List<String> roles){
         Claims claims = Jwts.claims().setSubject(username);
-        claims.put(,KEY_ROLES,roles);
+        claims.put(KEY_ROLES,roles);
 
         var now = new Date();
         var expiredDate = new Date(now.getTime() + TOKEN_EXPIRE_TIME);
@@ -40,10 +47,18 @@ public class TokenProvider {
                 .setExpiration(expiredDate) // 토큰 완료 시간
                 .signWith(SignatureAlgorithm.HS512, this.secretKey) // 사용할 암호화 알고리즘, 비밀키
                 .compact();
-
     }
 
-    public String getUser(String token){
+    public Authentication getAuthentication(String jwt){
+        UserDetails userDetails
+            = this.memberService.loadUserByUsername(this.getUsername(jwt));
+
+        return new UsernamePasswordAuthenticationToken(
+                userDetails,"",userDetails.getAuthorities());
+    }
+
+    public String getUsername(String token){
+
         return this.parseClaims(token).getSubject();
     }
 
@@ -57,7 +72,7 @@ public class TokenProvider {
         if(!StringUtils.hasText(token)) return false;
 
         var claims = this.parseClaims(token);
-        return claims.getExpiration().before(new Date());
+        return !claims.getExpiration().before(new Date());
     }
 
     private Claims parseClaims(String token){
