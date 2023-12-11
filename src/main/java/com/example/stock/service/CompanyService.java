@@ -1,6 +1,8 @@
 package com.example.stock.service;
 
+import com.example.stock.exception.impl.AlreadyExistTickerException;
 import com.example.stock.exception.impl.NoCompanyException;
+import com.example.stock.exception.impl.NoCompanyTickerException;
 import com.example.stock.model.Company;
 import com.example.stock.model.ScrapedResult;
 import com.example.stock.persist.CompanyRepository;
@@ -29,7 +31,7 @@ public class CompanyService {
     public Company save(String ticker){
         boolean exists = this.companyRepository.existsByTicker(ticker);
         if(exists){
-            throw new RuntimeException("already exists ticker ->"+ticker);
+            throw new AlreadyExistTickerException();
         }
 
         return this.storeCompanyAndDividend(ticker);
@@ -43,7 +45,7 @@ public class CompanyService {
         // ticker 를 기준으로 회사 스크래핑
         Company company = this.yahooFinancialScrapper.scrapCompanyByTicker(ticker);
         if(ObjectUtils.isEmpty(company)){
-            throw new RuntimeException("failed to scrap ticker ->"+ticker);
+            throw new NoCompanyTickerException();
         }
 
         // 해당 회사가 존재할 경우, 회사의 배당금 정보 스크래핑
@@ -70,6 +72,7 @@ public class CompanyService {
     }
 
     public void addAutocompleteKeyword(String keyword){
+
         this.trie.put(keyword,null);
     }
     public List<String> autoComplete(String keyword){
@@ -81,7 +84,7 @@ public class CompanyService {
         this.trie.remove(keyword);
     }
 
-    public String deleCompany(String ticker) {
+    public String deleteCompany(String ticker) {
         var company = this.companyRepository.findByTicker(ticker)
                 .orElseThrow(NoCompanyException::new);
         // 해당 회사의 배당금 지우기

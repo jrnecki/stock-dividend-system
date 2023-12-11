@@ -1,6 +1,8 @@
 package com.example.stock.service;
 
 import com.example.stock.exception.impl.AlreadyExistUserException;
+import com.example.stock.exception.impl.NoUserIdException;
+import com.example.stock.exception.impl.WrongPasswordException;
 import com.example.stock.model.Auth;
 import com.example.stock.persist.entity.MemberEntity;
 import com.example.stock.persist.MemberRepository;
@@ -26,10 +28,12 @@ public class MemberService implements UserDetailsService {
     }
 
     public MemberEntity register(Auth.SignUp member){
+        // 중복 id 확인
         boolean exists = this.memberRepository.existsByUsername(member.getUsername());
         if(exists){
             throw new AlreadyExistUserException();
         }
+        // 암호화된 채로 저장
         member.setPassword(this.passwordEncoder.encode(member.getPassword()));
         var result = this.memberRepository.save(member.toEntity());
         return result;
@@ -42,9 +46,9 @@ public class MemberService implements UserDetailsService {
     public MemberEntity authenticate(Auth.SignIn member){
         var user =
                 this.memberRepository.findByUsername(member.getUsername())
-                        .orElseThrow(() -> new RuntimeException("존재하지 않는 ID 입니다."));
+                        .orElseThrow(NoUserIdException::new);
         if(!this.passwordEncoder.matches(member.getPassword(), user.getPassword())){
-            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+            throw new WrongPasswordException();
         }
         return user;
     }

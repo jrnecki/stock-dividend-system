@@ -1,5 +1,6 @@
 package com.example.stock.web;
 
+import com.example.stock.exception.impl.NullInputException;
 import com.example.stock.model.Company;
 import com.example.stock.model.constants.CacheKey;
 import com.example.stock.persist.entity.CompanyEntity;
@@ -45,7 +46,7 @@ public class CompanyController {
     public ResponseEntity<?> addCompany(@RequestBody Company request){
         String ticker = request.getTicker().trim();
         if(ObjectUtils.isEmpty(ticker)){
-            throw new RuntimeException("ticker is empty()");
+            throw new NullInputException();
         }
         Company company = this.companyService.save(ticker);
         this.companyService.addAutocompleteKeyword(company.getName());
@@ -54,13 +55,15 @@ public class CompanyController {
     @DeleteMapping("/{ticker}")
     @PreAuthorize("hasRole('WRITE')")
     public ResponseEntity<?> deleteCompany(@PathVariable String ticker){
-        String companyName = this.companyService.deleCompany(ticker);
+        // db에서 지우기
+        String companyName = this.companyService.deleteCompany(ticker);
         // 캐시에서도 지우기
         this.clearFinanceCache((companyName));
         return ResponseEntity.ok(companyName);
     }
 
     public void clearFinanceCache(String companyName){
+
         this.redisCacheManager.getCache(CacheKey.KEY_FINANCE).evict(companyName);
     }
 
