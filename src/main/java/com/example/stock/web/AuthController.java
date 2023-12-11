@@ -35,7 +35,6 @@ public class AuthController {
         var token
                 = this.tokenProvider.generateToken(
                         memeber.getUsername(),memeber.getRoles());
-
         log.info("user login -> "+request.getUsername());
         return ResponseEntity.ok(token);
     }
