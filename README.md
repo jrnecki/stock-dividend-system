@@ -1,6 +1,8 @@
 # 📈 stock-dividend-system
 미국 주식 배당금 사이트(yahoo finance)를 스크래핑하여 정보를 제공하는 서비스입니다.
-
+- jwt토큰을 발행하여 member_role에 따라 인증,인가를 구현하였습니다.
+- 트리 알고리즘을 이용하여 자동완성 기능을 구현하였습니다.
+- 캐시를 이용하여 즐겨찾기 기능을 구현하였습니다.
 ## Stack
 - Spring Boot
 - java
